@@ -21,12 +21,31 @@
 # IMPORTANT 3: Print diagnostics so a future failure is visible in the log.
 # Also wrap checkout in `|| true` so an unforeseen ref error never aborts
 # the rest of the script under `set -e`.
+#
+# IMPORTANT 4: The workflow's `git clone -b openwrt-24.10-6.6 ...` does a
+# depth=1 shallow clone of the REMOTE repo. That means the remote does NOT
+# have arbitrary historical commits advertised in any ref, so a plain
+# `git fetch --depth 1 origin <hash>` fails with:
+#   fatal: remote error: upload-pack: not our ref <hash>
+#   fatal: unable to read tree (<hash>)
+# We must fetch with NO depth so git walks the ancestry from <hash> back to
+# the shallow root, OR use a sufficiently large depth that reaches back to
+# the commit's first parent.  The shortest commit-only fetch is unbounded
+# depth on that single commit's history line:
+#   git fetch --filter=blob:none origin <hash>
+# This pulls just the commit/ tree objects along the ancestry (not blobs),
+# which is small (a few MB) and ships the commit we need.
 echo "[cudy-tr3000] cwd=$(pwd)"
 echo "[cudy-tr3000] before-pin HEAD=$(git -C . rev-parse --short HEAD 2>/dev/null || echo unknown)"
 KERNEL_PIN=5f78e5c4a4aebf79f56dc7de0ed0ecc96c1a37cf
 if ! git -C . rev-parse --quiet --verify "$KERNEL_PIN^{commit}" >/dev/null 2>&1; then
-    echo "[cudy-tr3000] fetching kernel pin $KERNEL_PIN"
-    git -C . fetch --depth 1 origin "$KERNEL_PIN"
+    echo "[cudy-tr3000] fetching kernel pin $KERNEL_PIN (full ancestry, blobs excluded)"
+    # First try a narrow fetch with a generous depth that should reach any
+    # historical commit in this ~6-month-old repo.
+    if ! git -C . fetch --depth 200 origin "$KERNEL_PIN" 2>&1; then
+        echo "[cudy-tr3000] narrow fetch failed; falling back to commit-only fetch"
+        git -C . fetch --filter=blob:none origin "$KERNEL_PIN"
+    fi
 fi
 git -C . checkout "$KERNEL_PIN" || echo "[cudy-tr3000] WARN: checkout $KERNEL_PIN failed, continuing with current HEAD"
 echo "[cudy-tr3000] after-pin  HEAD=$(git -C . rev-parse --short HEAD 2>/dev/null || echo unknown)"
