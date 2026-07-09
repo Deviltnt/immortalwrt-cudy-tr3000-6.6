@@ -8,8 +8,14 @@
 # register/macro set. The current branch head is 6.6.133 + 2025-06 warp, which
 # fails with: 'WED_EX_INT_STA_FLD_TX_FBUF_HTH undeclared' etc.
 # Last known-good: 5f78e5c4a4ae (kernel 6.6.95 bump, 2025-06-29).
-git -C openwrt fetch --unshallow || true
-git -C openwrt checkout 5f78e5c4a4aebf79f56dc7de0ed0ecc96c1a37cf
+#
+# IMPORTANT: fetch the target commit by hash with depth=1 (NOT --unshallow, which
+# would pull the entire 6+ GB repo history and hang the runner for hours).
+KERNEL_PIN=5f78e5c4a4aebf79f56dc7de0ed0ecc96c1a37cf
+if ! git -C openwrt rev-parse --quiet --verify "$KERNEL_PIN^{commit}" >/dev/null 2>&1; then
+    git -C openwrt fetch --depth 1 origin "$KERNEL_PIN"
+fi
+git -C openwrt checkout "$KERNEL_PIN"
 
 # git config --local https.proxy socks5://host.docker.internal:1080
 
