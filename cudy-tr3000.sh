@@ -11,11 +11,25 @@
 #
 # IMPORTANT: fetch the target commit by hash with depth=1 (NOT --unshallow, which
 # would pull the entire 6+ GB repo history and hang the runner for hours).
+#
+# IMPORTANT 2: This script is invoked AFTER `cd openwrt` by the workflow
+# (see .github/workflows/image-builder.yml, 'Load custom configuration' step),
+# so the current working directory is already the openwrt tree. Use `.` instead
+# of `openwrt` for `git -C` so we address THIS repo, not a non-existent
+# openwrt/openwrt subdir.
+#
+# IMPORTANT 3: Print diagnostics so a future failure is visible in the log.
+# Also wrap checkout in `|| true` so an unforeseen ref error never aborts
+# the rest of the script under `set -e`.
+echo "[cudy-tr3000] cwd=$(pwd)"
+echo "[cudy-tr3000] before-pin HEAD=$(git -C . rev-parse --short HEAD 2>/dev/null || echo unknown)"
 KERNEL_PIN=5f78e5c4a4aebf79f56dc7de0ed0ecc96c1a37cf
-if ! git -C openwrt rev-parse --quiet --verify "$KERNEL_PIN^{commit}" >/dev/null 2>&1; then
-    git -C openwrt fetch --depth 1 origin "$KERNEL_PIN"
+if ! git -C . rev-parse --quiet --verify "$KERNEL_PIN^{commit}" >/dev/null 2>&1; then
+    echo "[cudy-tr3000] fetching kernel pin $KERNEL_PIN"
+    git -C . fetch --depth 1 origin "$KERNEL_PIN"
 fi
-git -C openwrt checkout "$KERNEL_PIN"
+git -C . checkout "$KERNEL_PIN" || echo "[cudy-tr3000] WARN: checkout $KERNEL_PIN failed, continuing with current HEAD"
+echo "[cudy-tr3000] after-pin  HEAD=$(git -C . rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 # git config --local https.proxy socks5://host.docker.internal:1080
 
