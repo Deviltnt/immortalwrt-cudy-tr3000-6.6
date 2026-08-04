@@ -67,6 +67,8 @@ jobs:
 
   call-builder:
     needs: setup
+    permissions:
+      contents: write
     uses: ./.github/workflows/image-builder.yml
     with:
       repo_url: ${{ needs.setup.outputs.repo_url }}
