@@ -18,26 +18,13 @@ rm -rf feeds/luci/themes/luci-theme-argon
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 git clone https://github.com/jerrykuku/luci-app-argon-config.git package/luci-app-argon-config
 
-# golang 26.x (matches bnaand; 28.x has historically broken passwall2 feeds)
+# golang 26.x for the Daed backend
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 
-# passwall2 dep packages (kept cloned so menuconfig remains coherent even
-# though luci-app-passwall2 itself is NOT in our .config)
-rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
-
-rm -rf feeds/luci/applications/luci-app-passwall
-# git clone https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall-luci
-git clone https://github.com/Openwrt-Passwall/openwrt-passwall2 package/passwall2-luci
-
-# tailscale (kept cloned to satisfy any leftover dep; not in our .config)
-# sed -i '/\/etc\/init\.d\/tailscale/d;/\/etc\/config\/tailscale/d;' feeds/packages/net/tailscale/Makefile
-# git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
-
-# daede: kenzok8/openwrt-daede (our choice over immortalwrt luci-app-daed)
+# daede: kenzok8/openwrt-daede
 rm -rf package/kenzok8/openwrt-daede
-git clone --depth 1 --branch v2026.07.07 https://github.com/kenzok8/openwrt-daede.git package/kenzok8/openwrt-daede
+git clone --depth 1 --branch v2026.08.04 https://github.com/kenzok8/openwrt-daede.git package/kenzok8/openwrt-daede
 
 # Remove immortalwrt's official daed/luci-app-daed from feeds so the build
 # does not also produce their packages (would conflict on /etc/config/daed).

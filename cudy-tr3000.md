@@ -1,11 +1,10 @@
 Software
 
 luci-app-argon-config
-luci-app-autoreboot
-luci-app-diskman
-luci-app-passwall2 (xray only)
-luci-app-ramfree
-luci-app-ksmbd
-luci-app-ttyd
-luci-app-upnp
-luci-app-aria2
+luci-app-daede (daed backend)
+luci-app-eqos-mtk
+luci-app-firewall
+luci-app-mtwifi-cfg
+luci-app-package-manager
+luci-app-turboacc-mtk
+luci-app-zerotier
