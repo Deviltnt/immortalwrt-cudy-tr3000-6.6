@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # git clone -b openwrt-24.10-6.6 --single-branch --filter=blob:none https://github.com/padavanonly/immortalwrt-mt798x-24.10 immortalwrt-mt798x-24.10
 # cd immortalwrt-mt798x-24.10
 
@@ -24,7 +26,7 @@ git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/l
 
 # daede: kenzok8/openwrt-daede
 rm -rf package/kenzok8/openwrt-daede
-git clone --depth 1 --branch v2026.08.04 https://github.com/kenzok8/openwrt-daede.git package/kenzok8/openwrt-daede
+git clone --depth 1 --branch v2026.08.10 https://github.com/kenzok8/openwrt-daede.git package/kenzok8/openwrt-daede
 
 # Remove immortalwrt's official daed/luci-app-daed from feeds so the build
 # does not also produce their packages (would conflict on /etc/config/daed).
